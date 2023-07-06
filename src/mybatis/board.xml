@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="test">
+	
+	<!-- 쿼리의 결과값을 매칭시켜 VO객체에 바로 담기 위한 resultMap 설정 -->
+	<resultMap id="TestResult" type="vo.BoardVO">
+		<result column="BOARD_ID" property="boardId"/>
+		<result column="BOARD_TITLE" property="boardTitle"/>
+		<result column="BOARD_WRITER" property="boardWriter"/>
+		<result column="BOARD_CONTENT" property="boardContent"/>
+		<result column="BOARD_DATE" property="boardDate"/>
+		<result column="BOARD_TYPE" property="boardType"/>
+	</resultMap>
+	
+	
+	<!-- select쿼리 - resultMap을 TestResult로 설정하였으므로 -->
+	<!-- 최종적으로는 결과값이 BoardVO로 반환하게 됨 -->
+	<select id="selectTest" parameterType="vo.BoardVO" resultMap="TestResult">
+		SELECT
+	    	board_id
+	    	,board_title
+	    	,board_writer
+	    	,board_content
+	    	,TO_CHAR(board_date, 'YYYY.MM.DD HH24:MI:SS') AS board_date
+	    FROM
+	    	fx_board
+	    WHERE 1=1
+	    <if test='boardId != null and boardId != ""' >
+		    AND board_id = #{boardId}
+		</if>
+		<if test='boardTitle != null and boardTitle != ""'>
+		    AND board_title LIKE '%'||#{boardTitle}||'%'
+		</if>
+		<if test='boardWriter != null and boardWriter != ""'>
+		    AND board_writer = #{boardWriter}
+		</if>
+		<if test='boardType != null and boardType != ""'>
+		    AND board_type = #{boardType}
+		</if>
+	    ORDER BY board_date DESC
+	</select>
+	
+	<insert id="insertTest" parameterType="vo.BoardVO">
+		INSERT INTO fx_board
+		(board_id, board_title, board_writer, board_date, board_content, board_type)
+		VALUES
+		(fx_board_seq.NEXTVAL, #{boardTitle}, #{boardWriter}, SYSDATE, #{boardContent}, #{boardType})
+	</insert>
+	
+	<update id = "updateTest" parameterType="vo.BoardVO">
+		UPDATE fx_board 
+		SET
+		    board_title = #{boardTitle},
+			board_writer = #{boardWriter},
+			board_date = SYSDATE,
+			board_content = #{boardContent}
+		WHERE 
+			 board_id=#{boardId}
+	</update>
+	
+	<delete id = "deleteTest" parameterType="vo.BoardVO">
+		DELETE FROM fx_board
+		WHERE board_id = #{boardId}
+	</delete>
+</mapper>
